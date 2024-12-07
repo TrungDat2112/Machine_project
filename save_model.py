@@ -35,6 +35,11 @@ rf_model.fit(X_train, y_train)
 #XGB model
 xgb_model = xgb.XGBRegressor(objective='reg:squarederror', n_estimators=100, random_state=42)
 xgb_model.fit(X_train, y_train)
+#SVM model
+
+from sklearn.svm import SVR
+svm_model = SVR( kernel='rbf')
+svm_model.fit(X_train, y_train)
 
 #DNN model
 import torch
@@ -59,6 +64,8 @@ X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
 y_train_tensor = torch.tensor(y_train.values, dtype=torch.float32).view(-1, 1)
 y_test_tensor = torch.tensor(y_test.values, dtype=torch.float32).view(-1, 1)
 
+
+
 model_nn = EnergyDNN(X_train_tensor.shape[1])
 optimizer = optim.Adam(model_nn.parameters(), lr=0.001)
 criterion = nn.MSELoss()
@@ -75,4 +82,5 @@ for epoch in range(epochs):
 joblib.dump(model_linear, 'linear_model.pkl')
 joblib.dump(rf_model, 'rf_model.pkl')
 joblib.dump(xgb_model, 'xgb_model.pkl')
+joblib.dump(svm_model,'svm_model.pkl')
 torch.save(model_nn.state_dict(), 'energy_dnn_model.pth')

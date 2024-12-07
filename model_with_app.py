@@ -28,6 +28,7 @@ class EnergyPredictionApp:
         self.model_linear = joblib.load('linear_model.pkl')
         self.rf_model = joblib.load('rf_model.pkl')
         self.xgb_model = joblib.load('xgb_model.pkl')
+        self.svm_model = joblib.load('svm_model.pkl')
 
         self.model_nn = EnergyDNN(6)  
         self.model_nn.load_state_dict(torch.load('energy_dnn_model.pth', weights_only=True))
@@ -38,7 +39,7 @@ class EnergyPredictionApp:
         self.model_label = tk.Label(self.root, text="Choose Model:")
         self.model_label.grid(row=0, column=0, padx=10, pady=10)
         
-        self.model_select = ttk.Combobox(self.root, values=["LinearRegression", "RandomForestRegressor", "XGB", "DNN"])
+        self.model_select = ttk.Combobox(self.root, values=["LinearRegression", "RandomForestRegressor", "XGB", "SVM", "DNN"])
         self.model_select.grid(row=0, column=1, padx=10, pady=10)
         self.model_select.set("LinearRegression") 
         
@@ -69,8 +70,10 @@ class EnergyPredictionApp:
             model = self.rf_model
         elif model_choice == "XGB":
             model = self.xgb_model
+        elif model_choice == "SVM":
+            model = self.svm_model
         elif model_choice == "DNN":
-            inputs_tensor = torch.tensor(np.array(inputs).reshape(1, -1), dtype=torch.float32)
+            inputs_tensor = torch.tensor(inputs, dtype=torch.float32).unsqueeze(0)
             output = self.model_nn(inputs_tensor).item()
             self.result_label.config(text=f"Predicted Energy Consumed (kWh): {output:.2f}")
             return
