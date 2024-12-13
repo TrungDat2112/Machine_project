@@ -45,10 +45,11 @@ class EnergyPredictionApp:
         
         self.model_linear = joblib.load('linear_model.pkl')
         self.rf_model = joblib.load('rf_model.pkl')
-        self.xgb_model = joblib.load('xgb_model.pkl')
-        self.svm_model = joblib.load('svm_model.pkl')
+        self.gb_model = joblib.load('gb_model.pkl')
+        self.ridge_model = joblib.load('ridge_model.pkl')
+        self.lasso_model = joblib.load('lasso_model.pkl')
 
-        self.model_nn = EnergyDNN(6)  
+        self.model_nn = EnergyDNN(3)  
         self.model_nn.load_state_dict(torch.load('energy_dnn_model.pth', weights_only=True))
         self.model_nn.eval()
         
@@ -57,13 +58,12 @@ class EnergyPredictionApp:
         self.model_label = tk.Label(self.root, text="Choose Model:")
         self.model_label.grid(row=0, column=0, padx=10, pady=10)
         
-        self.model_select = ttk.Combobox(self.root, values=["LinearRegression", "RandomForestRegressor", "XGB", "SVM", "DNN"])
+        self.model_select = ttk.Combobox(self.root, values=["LinearRegression", "RandomForestRegressor", "GradientBoosting", "Ridge", "Lasso", "DNN"])
         self.model_select.grid(row=0, column=1, padx=10, pady=10)
         self.model_select.set("LinearRegression") 
         
         self.input_fields = {}
-        input_labels = ['Battery Capacity (kWh)', 'Charging Duration (hours)', 'Charging Rate (kW)', 
-                        'Distance Driven (km)', 'Temperature (°C)', 'Vehicle Age (years)']
+        input_labels = ['Charging Time', 'Average Power', 'SOC Charged']
         
         for i, label in enumerate(input_labels):
             lbl = tk.Label(self.root, text=label)
@@ -86,14 +86,16 @@ class EnergyPredictionApp:
             model = self.model_linear
         elif model_choice == "RandomForestRegressor":
             model = self.rf_model
-        elif model_choice == "XGB":
-            model = self.xgb_model
-        elif model_choice == "SVM":
-            model = self.svm_model
+        elif model_choice == "GradientBoosting":
+            model = self.gb_model
+        elif model_choice == "Ridge":
+            model = self.ridge_model
+        elif model_choice == "Lasso":
+            model = self.lasso_model
         elif model_choice == "DNN":
             inputs_tensor = torch.tensor(inputs, dtype=torch.float32).unsqueeze(0)
             output = self.model_nn(inputs_tensor).item()
-            self.result_label.config(text=f"Predicted Energy Consumed (kWh): {output:.2f}")
+            self.result_label.config(text=f"Predicted Total Energy Delivered: {output:.2f}")
             return
         
         inputs_scaled = np.array(inputs).reshape(1, -1)
@@ -103,7 +105,7 @@ class EnergyPredictionApp:
             inputs_scaled = scaler.fit_transform(inputs_scaled)  
             
         prediction = model.predict(inputs_scaled)[0]
-        self.result_label.config(text=f"Predicted Energy Consumed (kWh): {prediction:.2f}")
+        self.result_label.config(text=f"Predicted Total Energy Delivered: {prediction:.2f}")
 
 
 if __name__ == "__main__":

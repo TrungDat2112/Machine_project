@@ -3,21 +3,14 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestRegressor
-import xgboost as xgb
+from sklearn.linear_model import Ridge, Lasso
+from sklearn.ensemble import GradientBoostingRegressor
 import joblib
 
-data = pd.read_csv('ev_charging_patterns.csv')  
+data = pd.read_csv('ev_data.csv')  
 
-energy_trungvi = data['Energy Consumed (kWh)'].median()
-data['Energy Consumed (kWh)'] = data['Energy Consumed (kWh)'].fillna(energy_trungvi)
-chargingrate_trungvi = data['Charging Rate (kW)'].median()
-data['Charging Rate (kW)'] = data['Charging Rate (kW)'].fillna(chargingrate_trungvi)
-distance_trungvi = data['Distance Driven (since last charge) (km)'].median()
-data['Distance Driven (since last charge) (km)'] = data['Distance Driven (since last charge) (km)'].fillna(distance_trungvi)
-
-inputs = data[['Battery Capacity (kWh)', 'Charging Duration (hours)', 'Charging Rate (kW)', 
-                 'Distance Driven (since last charge) (km)', 'Temperature (°C)', 'Vehicle Age (years)']]
-output = data['Energy Consumed (kWh)']
+inputs = data[['Charging Time', 'Average Power', 'SOC Charged']]
+output = data['Total Energy Delivered']
 
 
 scaler = StandardScaler()
@@ -28,18 +21,21 @@ X_train, X_test, y_train, y_test = train_test_split(X, output, test_size=0.2, ra
 model_linear = LinearRegression()
 model_linear.fit(X_train, y_train)
 
+#Ridge model
+ridge_model = Ridge(alpha=1.0)
+ridge_model.fit(X_train, y_train)
+
+#Lasso model
+lasso_model = Lasso(alpha=0.1)
+lasso_model.fit(X_train, y_train)
+
+#Gradient Boosting model
+gb_model = GradientBoostingRegressor(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)
+gb_model.fit(X_train, y_train)
+
 #Random Forest model
 rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
 rf_model.fit(X_train, y_train)
-
-#XGB model
-xgb_model = xgb.XGBRegressor(objective='reg:squarederror', n_estimators=100, random_state=42)
-xgb_model.fit(X_train, y_train)
-#SVM model
-
-from sklearn.svm import SVR
-svm_model = SVR( kernel='rbf')
-svm_model.fit(X_train, y_train)
 
 #DNN model
 import torch
@@ -100,6 +96,7 @@ for epoch in range(epochs):
 
 joblib.dump(model_linear, 'linear_model.pkl')
 joblib.dump(rf_model, 'rf_model.pkl')
-joblib.dump(xgb_model, 'xgb_model.pkl')
-joblib.dump(svm_model,'svm_model.pkl')
+joblib.dump(ridge_model, 'ridge_model.pkl')
+joblib.dump(lasso_model,'lasso_model.pkl')
+joblib.dump(gb_model,'gb_model.pkl')
 torch.save(model_nn.state_dict(), 'energy_dnn_model.pth')
