@@ -48,6 +48,7 @@ class EnergyPredictionApp:
         self.gb_model = joblib.load('gb_model.pkl')
         self.ridge_model = joblib.load('ridge_model.pkl')
         self.lasso_model = joblib.load('lasso_model.pkl')
+        self.svr_model = joblib.load('svr_model.pkl')
 
         self.model_nn = EnergyDNN(3)  
         self.model_nn.load_state_dict(torch.load('energy_dnn_model.pth', weights_only=True))
@@ -58,7 +59,7 @@ class EnergyPredictionApp:
         self.model_label = tk.Label(self.root, text="Choose Model:")
         self.model_label.grid(row=0, column=0, padx=10, pady=10)
         
-        self.model_select = ttk.Combobox(self.root, values=["LinearRegression", "RandomForestRegressor", "GradientBoosting", "Ridge", "Lasso", "DNN"])
+        self.model_select = ttk.Combobox(self.root, values=["LinearRegression", "RandomForestRegressor", "GradientBoosting", "Ridge", "Lasso","SVR", "DNN"])
         self.model_select.grid(row=0, column=1, padx=10, pady=10)
         self.model_select.set("LinearRegression") 
         
@@ -92,6 +93,8 @@ class EnergyPredictionApp:
             model = self.ridge_model
         elif model_choice == "Lasso":
             model = self.lasso_model
+        elif model_choice == "SVR":
+            model = self.svr_model
         elif model_choice == "DNN":
             inputs_tensor = torch.tensor(inputs, dtype=torch.float32).unsqueeze(0)
             output = self.model_nn(inputs_tensor).item()

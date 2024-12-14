@@ -6,6 +6,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Ridge, Lasso
 from sklearn.ensemble import GradientBoostingRegressor
 import joblib
+from sklearn.svm import SVR
 
 data = pd.read_csv('ev_data.csv')  
 
@@ -36,6 +37,10 @@ gb_model.fit(X_train, y_train)
 #Random Forest model
 rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
 rf_model.fit(X_train, y_train)
+
+#SVM model
+svr_model = SVR(kernel='rbf', C=1.0, epsilon=0.1)
+svr_model.fit(X_train, y_train)
 
 #DNN model
 import torch
@@ -99,4 +104,5 @@ joblib.dump(rf_model, 'rf_model.pkl')
 joblib.dump(ridge_model, 'ridge_model.pkl')
 joblib.dump(lasso_model,'lasso_model.pkl')
 joblib.dump(gb_model,'gb_model.pkl')
+joblib.dump(svr_model, 'svr_model.pkl')
 torch.save(model_nn.state_dict(), 'energy_dnn_model.pth')
